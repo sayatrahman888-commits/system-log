@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Night Login</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+@font-face {
+    font-family:"new";
+    font-weight: 10px;
+    src: url("d9464-arkhip_font.ttf");
+}
+
+html, body {
+    height: 100%;
+}
+
+/* 🌌 NIGHT BACKGROUND */
+body{
+    font-family:"new";
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    background:#050816;
+}
+
+/* 🌠 moving stars */
+.stars{
+    position:fixed;
+    width:200%;
+    height:200%;
+    background: radial-gradient(white 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: moveStars 40s linear infinite;
+    opacity:0.2;
+    z-index:-3;
+}
+
+@keyframes moveStars{
+    from{transform:translate(0,0);}
+    to{transform:translate(-500px, -500px);}
+}
+
+/* 🌌 glowing gradient waves */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background: linear-gradient(45deg, #0f0c29, #302b63, #24243e, #000000);
+    background-size:400% 400%;
+    animation: gradientMove 12s ease infinite;
+    z-index:-2;
+}
+
+@keyframes gradientMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+/* 🔵 LOGIN CARD */
+.container{
+    width:100%;
+    max-width:340px;
+    padding:25px;
+    border-radius:18px;
+
+    background:rgba(10,10,30,0.6);
+    backdrop-filter:blur(16px);
+
+    color:white;
+    text-align:center;
+
+    box-shadow:0 0 40px rgba(0,255,255,0.15);
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+    100%{transform:translateY(0);}
+}
+
+h2{
+    margin-bottom:15px;
+    color:#00e5ff;
+    text-shadow:0 0 10px #00e5ff;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:none;
+    border-radius:10px;
+    outline:none;
+
+    background:rgba(255,255,255,0.08);
+    color:white;
+    font-size:14px;
+}
+
+input:focus{
+    box-shadow:0 0 10px #00e5ff;
+}
+
+/* 🔥 button glow */
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(90deg,#00e5ff,#7c4dff);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+
+    transition:0.3s;
+    box-shadow:0 0 15px rgba(0,229,255,0.4);
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 25px rgba(0,229,255,0.8);
+}
+
+#result{
+    margin-top:10px;
+    font-size:13px;
+}
+
+/* ❌ ERROR SHAKE */
+.shake{
+    animation:shake 0.4s;
+    box-shadow:0 0 25px red;
+}
+
+@keyframes shake{
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-8px);}
+    50%{transform:translateX(8px);}
+    75%{transform:translateX(-8px);}
+    100%{transform:translateX(0);}
+}
+
+/* ❌ FLASH */
+.flash{
+    position:fixed;
+    inset:0;
+    background:red;
+    opacity:0;
+    animation:flash 0.4s;
+}
+
+@keyframes flash{
+    0%{opacity:0;}
+    30%{opacity:0.7;}
+    100%{opacity:0;}
+}
+
+/* 📱 mobile fix */
+@media(max-width:480px){
+    .container{
+        max-width:300px;
+        padding:20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<div class="container" id="box">
+    <h2>🌌 Night Login</h2>
+
+    <input id="login" placeholder="Login">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="checkLogin()">Enter</button>
+
+    <p id="result"></p>
+</div>
+
+<script>
+async function sha256(text){
+    const enc = new TextEncoder();
+    const data = enc.encode(text);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return [...new Uint8Array(hash)]
+        .map(b=>b.toString(16).padStart(2,'0'))
+        .join('');
+}
+
+function flash(){
+    const f=document.createElement("div");
+    f.className="flash";
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),400);
+}
+
+async function checkLogin(){
+    const box=document.getElementById("box");
+
+    const login=document.getElementById("login").value;
+    const pass=document.getElementById("password").value;
+
+    const l=await sha256(login);
+    const p=await sha256(pass);
+
+    const okL="805a78853a87518ad54013166df15b8c62304aed4d49572bd4659f64e9b3dd85";
+    const okP="e5e53c784d5d49de1cabb6e904bf3380026aadcb9769775a268dd304dd9aa2df";
+
+    box.classList.remove("shake");
+
+    if(l===okL && p===okP){
+        document.getElementById("result").innerText="✅ Welcome!";
+        box.style.boxShadow="0 0 40px #00ff99";
+    }else{
+        box.classList.add("shake");
+        document.getElementById("result").innerText="❌ Wrong!";
+        flash();
+
+        if(navigator.vibrate){
+            navigator.vibrate([200,100,200]);
+        }
+    }
+}
+</script>
+
+</body>
+</html>
